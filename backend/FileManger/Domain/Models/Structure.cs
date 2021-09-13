@@ -26,5 +26,7 @@ namespace Domain.Models
         public long? FatherStructureId { get; set; }
 
         public DateTime DateRecord { get; set; }
+
+
     }
 }
