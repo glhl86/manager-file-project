@@ -13,5 +13,9 @@ namespace CrossCutting.Enumerators
         public const string FILE = "File";
         public const string FOLDER = "Folder";
         public const string OK = "OK";
+        public const string INVALID_LOGIN = "Login inválido";
+        public const string LOGOUT = "Sesión cerrada";
+        public const string FORGOTPASSWORD = "Clave actualizada correctamente";
+        public const string INVALID_FORGOTPASSWORD = "no se pudo cambiar la clave";
     }
 }
