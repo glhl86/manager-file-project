@@ -27,6 +27,5 @@ namespace Domain.Models
 
         public DateTime DateRecord { get; set; }
 
-
     }
 }

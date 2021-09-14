@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Domain.Models
@@ -19,5 +16,7 @@ namespace Domain.Models
         [Column("UserId", TypeName = "nvarchar(450)")]
         public string UserId { get; set; }
 
+        [ForeignKey("StructureId")]
+        public virtual Structure Structure { get; set; }
     }
 }

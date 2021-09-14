@@ -36,6 +36,6 @@ namespace Domain.Models
         public long? IdState { get; set; }
 
         [ForeignKey("IdState")]
-        public States States { get; set; }
+        public virtual States States { get; set; }
     }
 }
