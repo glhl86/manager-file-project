@@ -1,12 +1,11 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 
 namespace Domain.Models
 {
-    [Table("Owner")]
+    [Table("Structure")]
     public class Structure
     {
         [Column("StructureId", TypeName = "bigint")]
