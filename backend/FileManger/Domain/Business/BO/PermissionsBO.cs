@@ -12,7 +12,7 @@ using System.Linq.Expressions;
 
 namespace Domain.Business.BO
 {
-    public class PermissionsBO : IPermissionsBO
+    public class PermissionsBO : IPermissions
     {
         private readonly FileManagerContext context;
         private readonly IMapper mapper;

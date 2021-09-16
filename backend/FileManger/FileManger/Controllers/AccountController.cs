@@ -37,13 +37,12 @@ namespace FileManger.Controllers
 
         [HttpPost]
         [Route("[action]")]
-        public async Task<IActionResult> CreateUsersAsync([FromBody] LoginAM data)
+        public async Task<IActionResult> CreateUsersAsync([FromBody] RegisterAM data)
         {
             try
             {
                 data.Person.IdState = (long?)ApiEnums.Estates.ACTIVE;
                 data.Person.RegistrationDate = DateTime.Now;
-
                 var personId = personBO.Create(data.Person);
 
                 if (personId > 0)
@@ -77,6 +76,7 @@ namespace FileManger.Controllers
         }
 
         [HttpPost]
+        [Route("[action]")]
         public async Task<IActionResult> Login(LoginAM data)
         {
             try
@@ -85,10 +85,7 @@ namespace FileManger.Controllers
                 var result = await singInManager.PasswordSignInAsync(data.Email, data.Password, true, false);
 
                 if (user != null && user.IdState == 1 && result.Succeeded)
-                {
-                    HttpContext.Session.SetString("IdUsers", user.Id);
                     return StatusCode(StatusCodes.Status200OK, new JsonResponse { Status = StatusCodes.Status200OK, Result = user, Title = ApiMessage.OK, TraceId = Guid.NewGuid().ToString() });
-                }
                 else
                     return StatusCode(StatusCodes.Status401Unauthorized, new JsonResponse { Status = StatusCodes.Status401Unauthorized, Title = ApiMessage.INVALID_LOGIN, TraceId = Guid.NewGuid().ToString() });
             }

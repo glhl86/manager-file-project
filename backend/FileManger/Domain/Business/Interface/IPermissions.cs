@@ -5,7 +5,7 @@ using System.Linq.Expressions;
 
 namespace Domain.Business.Interface
 {
-    public interface IPermissionsBO
+    public interface IPermissions
     {
         public void Update(PermissionsAM entity);
         public PermissionsAM GetFirst(Expression<Func<PermissionsAM, bool>> predicate);

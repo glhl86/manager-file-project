@@ -11,9 +11,9 @@ namespace CrossCutting.ApiModel
 
         [Required(ErrorMessage = "Campo requerido.")]
         public string Name { get; set; }
+        public string SecondName { get; set; }
 
         [Required(ErrorMessage = "Campo requerido.")]
-        public string SecondName { get; set; }
         public string Surname { get; set; }
         public string SecondSurname { get; set; }
         public string Identification { get; set; }

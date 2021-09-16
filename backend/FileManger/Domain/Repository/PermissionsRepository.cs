@@ -1,5 +1,6 @@
 ﻿using Domain.Models;
 using Domain.Repository.Base;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -69,7 +70,7 @@ namespace Domain.Repository
         {
             try
             {
-                return context.Permissions.ToList();
+                return context.Permissions.Include(j=> j.Structure).ToList();
             }
             catch (Exception ex)
             {
@@ -81,7 +82,7 @@ namespace Domain.Repository
         {
             try
             {
-                return context.Permissions.Where(predicate).ToList();
+                return context.Permissions.Include(j => j.Structure).Where(predicate).ToList();
             }
             catch (Exception ex)
             {
