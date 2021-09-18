@@ -14,6 +14,8 @@ namespace FileManger
 {
     public class Startup
     {
+        private readonly string thisCors = "thisCors";
+
         public Startup(IConfiguration configuration)
         {
             Configuration = configuration;
@@ -24,6 +26,15 @@ namespace FileManger
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddCors(j =>
+            {
+                j.AddPolicy(name: thisCors,
+                           builder =>
+                           {
+                               builder.WithOrigins("*");
+                           });
+            });
+
             var migrationsAssembly = typeof(Startup).GetTypeInfo().Assembly.GetName().Name;
 
             services.AddDbContext<AuthDbContext>(builder =>
@@ -62,7 +73,7 @@ namespace FileManger
             app.UseHttpsRedirection();
             app.UseRouting();
             app.UseStaticFiles();
-            app.UseCors();
+            app.UseCors(thisCors);
 
 
             app.UseAuthentication();

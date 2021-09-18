@@ -68,7 +68,7 @@ namespace FileManger.Controllers
                     }
 
                 // EmailAM email = new EmailAM { Email = "dexterdexter86@gmail.com", Message = "Carpetas configuradas" };
-                // bool emailSent = sendEmails.SendEmailConfig(email);
+                // bool emailSent = sendEmails.SendEmailConfig(email); solo enviar si es archivo
 
                 return StatusCode(StatusCodes.Status201Created, new JsonResponse { Status = StatusCodes.Status201Created, Result = data, Title = ApiMessage.SUCCESFULLY, TraceId = Guid.NewGuid().ToString() });
             }
@@ -97,6 +97,29 @@ namespace FileManger.Controllers
             try
             {
                 List<PermissionsAM> permissions = permissionsBO.Get(j => j.UserId == data.Id);
+
+                return StatusCode(StatusCodes.Status201Created, new JsonResponse { Status = StatusCodes.Status201Created, Result = permissions, Title = ApiMessage.SUCCESFULLY, TraceId = Guid.NewGuid().ToString() });
+            }
+            catch (Exception e)
+            {
+                logger.LogInformation("Error: {mess}", e);
+                return StatusCode(StatusCodes.Status500InternalServerError, new JsonResponse
+                {
+                    Status = StatusCodes.Status500InternalServerError,
+                    Title = ApiMessage.INTERNAL_ERROR,
+                    Errors = new string[] { e.Message },
+                    TraceId = Guid.NewGuid().ToString()
+                });
+            }
+        }
+
+        [HttpGet]
+        [Route("[action]")]
+        public IActionResult GetFiles()
+        {
+            try
+            {
+                List<PermissionsAM> permissions = permissionsBO.Get();
 
                 return StatusCode(StatusCodes.Status201Created, new JsonResponse { Status = StatusCodes.Status201Created, Result = permissions, Title = ApiMessage.SUCCESFULLY, TraceId = Guid.NewGuid().ToString() });
             }
