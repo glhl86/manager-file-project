@@ -11,8 +11,6 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace FileManger.Controllers
 {
@@ -47,25 +45,12 @@ namespace FileManger.Controllers
                 PermissionsAM permissions = new PermissionsAM { StructureId = data.StructureId, UserId = "d42a4c42-8a97-4d5a-a02e-11d0dbcf7050" };
                 permissionsBO.Create(permissions);
 
-                if (data.ListStrure != null && data.ListStrure.Count > 0)
-                    foreach (StructureAM st in data.ListStrure)
-                    {
-                        st.FatherStructureId = data.StructureId;
-                        st.StructureId = CreateData(st);
+                if (data.IsFile)
+                {
 
-                        permissions = new PermissionsAM { StructureId = st.StructureId, UserId = "d42a4c42-8a97-4d5a-a02e-11d0dbcf7050" };
-                        permissionsBO.Create(permissions);
+                }
 
-                        if (st.ListStrure != null && st.ListStrure.Count > 0)
-                            foreach (StructureAM j in st.ListStrure)
-                            {
-                                j.FatherStructureId = st.StructureId;
-                                j.StructureId = CreateData(j);
 
-                                permissions = new PermissionsAM { StructureId = j.StructureId, UserId = "d42a4c42-8a97-4d5a-a02e-11d0dbcf7050" };
-                                permissionsBO.Create(permissions);
-                            }
-                    }
 
                 // EmailAM email = new EmailAM { Email = "dexterdexter86@gmail.com", Message = "Carpetas configuradas" };
                 // bool emailSent = sendEmails.SendEmailConfig(email); solo enviar si es archivo
@@ -83,11 +68,6 @@ namespace FileManger.Controllers
                     TraceId = Guid.NewGuid().ToString()
                 });
             }
-        }
-
-        private long CreateData(StructureAM data)
-        {
-            return structureBO.Create(data);
         }
 
         [HttpGet]
@@ -135,6 +115,19 @@ namespace FileManger.Controllers
                 });
             }
         }
+
+        #region PRIVATE METHODS
+        /// <summary>
+        /// Guardar la estructura de las carpetas y archivos
+        /// </summary>
+        /// <param name="data"></param>
+        /// <returns></returns>
+        private long CreateData(StructureAM data)
+        {
+            return structureBO.Create(data);
+        }
+
+        #endregion
 
     }
 }

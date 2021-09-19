@@ -1,4 +1,5 @@
 ﻿using CrossCutting.ApiModel;
+using CrossCutting.ApiModel.Common;
 using CrossCutting.Enumerators;
 using Domain.Business.BO;
 using Domain.Business.Interface;
@@ -6,12 +7,18 @@ using Domain.Models;
 using FileManger.Identity.Models;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
+using Microsoft.IdentityModel.Tokens;
 using System;
+using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
+using System.Security.Claims;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace FileManger.Controllers
@@ -25,14 +32,16 @@ namespace FileManger.Controllers
         private readonly RoleManager<Role> roleManager;
         private readonly UserManager<Users> userManager;
         private readonly IPerson personBO;
+        private readonly AppSettings appSettings;
 
-        public AccountController(FileManagerContext context, ILogger<AccountController> log, UserManager<Users> userManag, SignInManager<Users> signInManag, RoleManager<Role> roleManag)
+        public AccountController(FileManagerContext context, ILogger<AccountController> log, UserManager<Users> userManag, SignInManager<Users> signInManag, RoleManager<Role> roleManag, IOptions<AppSettings> appSet)
         {
             personBO = new PersonBO(context);
             singInManager = signInManag;
             roleManager = roleManag;
             userManager = userManag;
             logger = log;
+            appSettings = appSet.Value;
         }
 
         [HttpPost]
@@ -85,7 +94,10 @@ namespace FileManger.Controllers
                 var result = await singInManager.PasswordSignInAsync(data.Email, data.Password, true, false);
 
                 if (user != null && user.IdState == 1 && result.Succeeded)
-                    return StatusCode(StatusCodes.Status200OK, new JsonResponse { Status = StatusCodes.Status200OK, Result = user, Title = ApiMessage.OK, TraceId = Guid.NewGuid().ToString() });
+                {
+                    string token = GetToken(user);
+                    return StatusCode(StatusCodes.Status200OK, new JsonResponse { Status = StatusCodes.Status200OK, Result = new { Token = token, user }, Title = ApiMessage.OK, TraceId = Guid.NewGuid().ToString() });
+                }
                 else
                     return StatusCode(StatusCodes.Status401Unauthorized, new JsonResponse { Status = StatusCodes.Status401Unauthorized, Title = ApiMessage.INVALID_LOGIN, TraceId = Guid.NewGuid().ToString() });
             }
@@ -118,6 +130,7 @@ namespace FileManger.Controllers
 
         [HttpGet]
         [Route("[action]")]
+        [Authorize]
         public IActionResult GetRolesAsync()
         {
             try
@@ -161,5 +174,29 @@ namespace FileManger.Controllers
                 return StatusCode(StatusCodes.Status304NotModified, new JsonResponse { Status = StatusCodes.Status304NotModified, Title = ApiMessage.INVALID_FORGOTPASSWORD, TraceId = Guid.NewGuid().ToString() });
             }
         }
+
+        #region PRIVATE METHODS
+        private string GetToken(Users user)
+        {
+            var tokenHandler = new JwtSecurityTokenHandler();
+            var keys = Encoding.ASCII.GetBytes(appSettings.Secret);
+            var tokenDesc = new SecurityTokenDescriptor
+            {
+                Subject = new ClaimsIdentity(
+                    new Claim[]
+                    {
+                        new Claim(ClaimTypes.NameIdentifier, user.Id),
+                        new Claim(ClaimTypes.Email, user.Email)
+                    }
+                ),
+                Expires = DateTime.Now.AddDays(60),
+                SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(keys), SecurityAlgorithms.HmacSha256Signature)
+            };
+
+            var token = tokenHandler.CreateToken(tokenDesc);
+
+            return tokenHandler.WriteToken(token);
+        }
+        #endregion
     }
 }

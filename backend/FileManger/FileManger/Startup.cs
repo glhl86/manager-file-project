@@ -1,5 +1,7 @@
+using CrossCutting.ApiModel.Common;
 using Domain.Models;
 using FileManger.Identity.Models;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
@@ -7,8 +9,10 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.IdentityModel.Tokens;
 using System;
 using System.Reflection;
+using System.Text;
 
 namespace FileManger
 {
@@ -60,6 +64,29 @@ namespace FileManger
             });
 
             services.AddControllers();
+
+            var section = Configuration.GetSection("AppSettings");
+            services.Configure<AppSettings>(section);
+
+            // jwt
+            var appSettings = section.Get<AppSettings>();
+            var keys = Encoding.ASCII.GetBytes(appSettings.Secret);
+            services.AddAuthentication(j =>
+            {
+                j.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                j.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+            }).AddJwtBearer(j =>
+            {
+                j.RequireHttpsMetadata = false;
+                j.SaveToken = true;
+                j.TokenValidationParameters = new TokenValidationParameters
+                {
+                    ValidateIssuerSigningKey = true,
+                    IssuerSigningKey = new SymmetricSecurityKey(keys),
+                    ValidateIssuer = false,
+                    ValidateAudience = false
+                };
+            });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
