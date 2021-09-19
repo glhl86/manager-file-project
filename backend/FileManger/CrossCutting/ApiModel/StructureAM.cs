@@ -17,6 +17,6 @@ namespace CrossCutting.ApiModel
         public long? FatherStructureId { get; set; }
         public DateTime DateRecord { get; set; }
 
-        public List<StructureAM> ListStrure { get; set; }
+       public List<StructureAM> ListStrure { get; set; }
     }
 }

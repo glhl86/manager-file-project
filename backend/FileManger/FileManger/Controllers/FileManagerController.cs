@@ -12,6 +12,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Security.Claims;
 
 namespace FileManger.Controllers
@@ -39,29 +40,46 @@ namespace FileManger.Controllers
 
         [HttpPost]
         [Route("[action]")]
-        public IActionResult Create([FromBody] StructureAM data)
+        public IActionResult Create([FromForm] StructureAM data)
         {
             try
             {
                 string userId = this.User.FindFirst(ClaimTypes.NameIdentifier).Value;
-                data.StructureId = CreateData(data);
+                string email = this.User.FindFirst(ClaimTypes.Email).Value;
+                string rootFolder = Configuration.GetSection("Folder").Value;
 
-                PermissionsAM permissions = new PermissionsAM { StructureId = data.StructureId, UserId = userId };
-                permissionsBO.Create(permissions);
+                data.DateRecord = DateTime.Now;
 
                 if (data.IsFile)
                 {
-
+                    
+                    // Envio email
+                    EmailAM mail = new EmailAM { Email = email, Message = ApiMessage.EMAIL_MESSAGE };
+                    bool emailSent = sendEmails.SendEmailConfig(mail); // enviar solo si es archivo
                 }
                 else
                 {
+                    if (data.FatherStructureId == null)
+                    {
+                        data.StructureId = CreateData(data);
+                        string path = Path.Combine(rootFolder, data.StructureName);
 
+                        CreateDirectory(path);
+                    }
+                    else
+                    {
+                        string buildPath = BuildPath(data, data.StructureName);
+                        string path = Path.Combine(rootFolder, buildPath);
+
+                        data.PathFile = buildPath;
+                        data.StructureId = CreateData(data);
+
+                        CreateDirectory(path);
+                    }
                 }
 
-
-
-                // EmailAM email = new EmailAM { Email = "dexterdexter86@gmail.com", Message = "Carpetas configuradas" };
-                // bool emailSent = sendEmails.SendEmailConfig(email); solo enviar si es archivo
+                PermissionsAM permissions = new PermissionsAM { StructureId = data.StructureId, UserId = userId };
+                permissionsBO.Create(permissions);
 
                 return StatusCode(StatusCodes.Status201Created, new JsonResponse { Status = StatusCodes.Status201Created, Result = data, Title = ApiMessage.SUCCESFULLY, TraceId = Guid.NewGuid().ToString() });
             }
@@ -77,6 +95,8 @@ namespace FileManger.Controllers
                 });
             }
         }
+
+
 
         [HttpGet]
         [Route("[action]")]
@@ -135,6 +155,27 @@ namespace FileManger.Controllers
             return structureBO.Create(data);
         }
 
+        private string BuildPath(StructureAM data, string path)
+        {
+            if (data.FatherStructureId != null && data.FatherStructureId > 0)
+            {
+                StructureAM father = structureBO.Get(data.FatherStructureId.Value);
+                if (father != null && father.StructureId > 0)
+                {
+                    path = Path.Combine(father.StructureName, path);
+                    path = BuildPath(father, path);
+                }
+                return path;
+            }
+            else
+                return path;
+        }
+
+        private void CreateDirectory(string path)
+        {
+            if (!Directory.Exists(path))
+                Directory.CreateDirectory(path);
+        }
         #endregion
 
     }

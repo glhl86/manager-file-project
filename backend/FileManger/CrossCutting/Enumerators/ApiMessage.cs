@@ -17,5 +17,6 @@ namespace CrossCutting.Enumerators
         public const string LOGOUT = "Sesión cerrada";
         public const string FORGOTPASSWORD = "Clave actualizada correctamente";
         public const string INVALID_FORGOTPASSWORD = "no se pudo cambiar la clave";
+        public const string EMAIL_MESSAGE = "Archivos configurados";
     }
 }
