@@ -5,17 +5,20 @@ using Domain.Business.Interface;
 using Domain.Models;
 using FileManger.Utils;
 using FileManger.Utils.Interface;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
+using System.Security.Claims;
 
 namespace FileManger.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class FileManagerController : ControllerBase
     {
         private readonly ILogger<FileManagerController> logger;
@@ -40,12 +43,17 @@ namespace FileManger.Controllers
         {
             try
             {
+                string userId = this.User.FindFirst(ClaimTypes.NameIdentifier).Value;
                 data.StructureId = CreateData(data);
 
-                PermissionsAM permissions = new PermissionsAM { StructureId = data.StructureId, UserId = "d42a4c42-8a97-4d5a-a02e-11d0dbcf7050" };
+                PermissionsAM permissions = new PermissionsAM { StructureId = data.StructureId, UserId = userId };
                 permissionsBO.Create(permissions);
 
                 if (data.IsFile)
+                {
+
+                }
+                else
                 {
 
                 }

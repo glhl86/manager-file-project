@@ -137,7 +137,7 @@ namespace FileManger.Controllers
             {
                 var data = roleManager.Roles.ToList();
 
-                return StatusCode(StatusCodes.Status200OK, new JsonResponse { Status = StatusCodes.Status200OK, Result = data, Title = ApiMessage.SUCCESFULLY, TraceId = Guid.NewGuid().ToString() });
+                return StatusCode(StatusCodes.Status200OK, new JsonResponse { Status = StatusCodes.Status200OK, Result = data, Title = ApiMessage.OK, TraceId = Guid.NewGuid().ToString() });
             }
             catch (Exception e)
             {
